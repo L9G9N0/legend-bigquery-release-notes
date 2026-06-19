@@ -7,6 +7,16 @@ from cache import FileBackedCache
 from ai_service import get_ai_insight
 
 # ==========================================================================
+# Load Environment Variables from .env
+# ==========================================================================
+if os.path.exists('.env'):
+    with open('.env', 'r') as f:
+        for line in f:
+            if '=' in line and not line.startswith('#'):
+                key, val = line.strip().split('=', 1)
+                os.environ[key] = val.strip()
+
+# ==========================================================================
 # Structured Logging Setup (Production Standard JSON logs)
 # ==========================================================================
 class StructuredJsonFormatter(logging.Formatter):
