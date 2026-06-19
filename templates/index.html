@@ -3,12 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Browse, search, and filter the latest Google Cloud BigQuery release notes. Select updates and tweet about them instantly.">
-  <title>BigQuery Release Notes Explorer</title>
+  <meta name="description" content="Production-grade Google Cloud BigQuery Release Notes Dashboard. Search, filter, bookmark, and generate Gemini AI summaries.">
+  <title>BigQuery Release Notes Dashboard</title>
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- DOMPurify for XSS Protection -->
+  <script src="https://unpkg.com/dompurify@3.0.8/dist/purify.min.js"></script>
   <!-- Stylesheet -->
   <link rel="stylesheet" href="/static/style.css">
 </head>
@@ -21,16 +23,16 @@
   <header class="main-header">
     <div class="header-container">
       <div class="brand">
-        <svg class="bq-logo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <svg class="bq-logo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
           <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
         </svg>
         <div class="brand-text">
           <h1>BigQuery</h1>
-          <span class="sub-logo">Release Explorer</span>
+          <span class="sub-logo">Release Dashboard</span>
         </div>
       </div>
       <div class="header-actions">
-        <button id="theme-toggle" class="btn-icon" aria-label="Toggle theme">
+        <button id="theme-toggle" class="btn-icon" aria-label="Toggle light or dark theme">
           <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="12" r="5"></circle>
             <line x1="12" y1="1" x2="12" y2="3"></line>
@@ -46,8 +48,8 @@
             <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
           </svg>
         </button>
-        <button id="refresh-btn" class="btn btn-primary" aria-label="Refresh release notes">
-          <svg class="spinner-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <button id="refresh-btn" class="btn btn-primary" aria-label="Refresh notes feed">
+          <svg class="spinner-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
             <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
           </svg>
           <span>Refresh</span>
@@ -58,45 +60,92 @@
 
   <!-- Main Content Dashboard -->
   <main class="dashboard-container">
-    <!-- Toolbar Search & Filter -->
-    <section class="toolbar-section">
-      <div class="search-box">
-        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="11" cy="11" r="8"></circle>
-          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-        </svg>
-        <input type="text" id="search-input" placeholder="Search release notes (e.g. embeddings, study, studio)..." aria-label="Search release notes">
-        <button id="clear-search" class="clear-btn" aria-label="Clear search" style="display: none;">&times;</button>
+    <!-- Toolbar Search & Advanced Filters -->
+    <section class="toolbar-section" aria-label="Search and Filter Toolbar">
+      <!-- Row 1: Search & Date Range -->
+      <div class="toolbar-row-main">
+        <div class="search-box">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input type="text" id="search-input" placeholder="Search keywords or press '/' (e.g. embeddings, study)..." aria-label="Search release notes">
+          <button id="clear-search" class="clear-btn" aria-label="Clear search text" style="display: none;">&times;</button>
+        </div>
+
+        <div class="date-picker-container">
+          <span class="filter-label-inline">Date Range:</span>
+          <div class="date-inputs">
+            <input type="date" id="date-start" aria-label="Start Date">
+            <span class="date-sep">to</span>
+            <input type="date" id="date-end" aria-label="End Date">
+          </div>
+        </div>
       </div>
       
+      <!-- Row 2: Pills (Multi-select) -->
       <div class="filters-container">
         <span class="filter-label">Filter by type:</span>
         <div id="filter-pills" class="filter-pills">
-          <button class="pill active" data-type="all">All</button>
-          <button class="pill" data-type="feature">Features</button>
-          <button class="pill" data-type="announcement">Announcements</button>
-          <button class="pill" data-type="deprecation">Deprecations</button>
-          <button class="pill" data-type="issue">Issues</button>
-          <button class="pill" data-type="change">Changes</button>
+          <button class="pill active" data-type="all" aria-pressed="true">All</button>
+          <button class="pill" data-type="feature" aria-pressed="false">Features</button>
+          <button class="pill" data-type="announcement" aria-pressed="false">Announcements</button>
+          <button class="pill" data-type="deprecation" aria-pressed="false">Deprecations</button>
+          <button class="pill" data-type="issue" aria-pressed="false">Issues</button>
+          <button class="pill" data-type="change" aria-pressed="false">Changes</button>
         </div>
       </div>
     </section>
 
-    <!-- Notes Grid -->
-    <section class="notes-section">
+    <!-- Notes Display Section -->
+    <section class="notes-section" aria-labelledby="results-count">
+      <!-- Toolbar controls for grid layout and bulk exports -->
       <div class="section-header">
-        <h2 id="results-count">All Release Notes</h2>
-        <span id="cache-time" class="cache-time"></span>
+        <div class="results-meta-left">
+          <h2 id="results-count">All Release Notes</h2>
+          <span id="cache-time" class="cache-time"></span>
+        </div>
+        
+        <div class="grid-controls">
+          <!-- Grid / List toggle -->
+          <div class="layout-toggle-group" role="group" aria-label="Card Layout">
+            <button id="layout-grid-btn" class="btn-layout active" aria-label="Grid layout" aria-pressed="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <rect x="3" y="3" width="7" height="7"></rect>
+                <rect x="14" y="3" width="7" height="7"></rect>
+                <rect x="14" y="14" width="7" height="7"></rect>
+                <rect x="3" y="14" width="7" height="7"></rect>
+              </svg>
+            </button>
+            <button id="layout-list-btn" class="btn-layout" aria-label="List layout" aria-pressed="false">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <line x1="8" y1="6" x2="21" y2="6"></line>
+                <line x1="8" y1="12" x2="21" y2="12"></line>
+                <line x1="8" y1="18" x2="21" y2="18"></line>
+                <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                <line x1="3" y1="18" x2="3.01" y2="18"></line>
+              </svg>
+            </button>
+          </div>
+          
+          <!-- Bulk Exports -->
+          <div class="export-group" role="group" aria-label="Bulk Exporters">
+            <button id="export-json-btn" class="btn btn-outline btn-sm">Export JSON</button>
+            <button id="export-csv-btn" class="btn btn-outline btn-sm">Export CSV</button>
+            <button id="export-pdf-btn" class="btn btn-outline btn-sm">Print PDF</button>
+          </div>
+        </div>
       </div>
       
       <!-- Error Message Banner -->
       <div id="error-banner" class="error-banner" style="display: none;">
-        <span class="error-text">Failed to fetch release notes. Please try again.</span>
-        <button id="error-retry-btn" class="btn btn-outline btn-sm">Retry</button>
+        <span class="error-text">Failed to fetch release notes. Check your connection.</span>
+        <button id="error-retry-btn" class="btn btn-outline btn-sm">Retry Load</button>
       </div>
 
       <!-- Grid container -->
-      <div id="notes-grid" class="notes-grid">
+      <div id="notes-grid" class="notes-grid grid-layout">
         <!-- Skeleton loaders shown on load -->
         <div class="skeleton-card"></div>
         <div class="skeleton-card"></div>
@@ -108,87 +157,141 @@
 
       <!-- No Results State -->
       <div id="no-results" class="no-results-container" style="display: none;">
-        <svg class="no-results-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <svg class="no-results-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
           <circle cx="12" cy="12" r="10"></circle>
           <line x1="8" y1="12" x2="16" y2="12"></line>
         </svg>
-        <h3>No release notes found</h3>
-        <p>Try refining your search terms or selecting a different filter category.</p>
+        <h3>No release notes match your filters</h3>
+        <p>Try refining your search terms, selecting a wider date range, or toggling filter pills.</p>
       </div>
     </section>
   </main>
 
   <!-- Slide-out Drawer Detail View (HTML5 Modal Dialog) -->
-  <dialog id="detail-drawer">
+  <dialog id="detail-drawer" aria-labelledby="drawer-date" aria-modal="true">
     <div class="drawer-header">
       <div class="drawer-header-left">
         <span id="drawer-badge" class="badge">Feature</span>
         <span id="drawer-date" class="drawer-date">June 17, 2026</span>
       </div>
-      <button id="drawer-close" class="btn-icon close-btn" aria-label="Close details">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <button id="drawer-close" class="btn-icon close-btn" aria-label="Close details panel">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
           <line x1="18" y1="6" x2="6" y2="18"></line>
           <line x1="6" y1="6" x2="18" y2="18"></line>
         </svg>
       </button>
     </div>
     
+    <!-- Drawer Navigation Tabs -->
+    <div class="drawer-tabs" role="tablist" aria-label="Release Details Info">
+      <button class="drawer-tab-btn active" role="tab" aria-selected="true" aria-controls="tab-details" data-tab="details">Details</button>
+      <button class="drawer-tab-btn" role="tab" aria-selected="false" aria-controls="tab-ai" data-tab="ai">Gemini AI Analysis</button>
+      <button class="drawer-tab-btn" role="tab" aria-selected="false" aria-controls="tab-share" data-tab="share">Share & Export</button>
+    </div>
+    
     <div class="drawer-content">
-      <div id="drawer-html-content" class="note-full-html">
-        <!-- Main release note HTML content goes here -->
+      <!-- TAB 1: Details HTML -->
+      <div id="tab-details" class="tab-pane active" role="tabpanel" aria-labelledby="details-tab">
+        <div id="drawer-html-content" class="note-full-html">
+          <!-- Main release note HTML content goes here -->
+        </div>
+        <div class="source-link-container">
+          <a id="drawer-source-link" href="#" target="_blank" rel="noopener noreferrer" class="source-link">
+            <span>View on Google Cloud Release Notes</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="external-icon" aria-hidden="true">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+              <polyline points="15 3 21 3 21 9"></polyline>
+              <line x1="10" y1="14" x2="21" y2="3"></line>
+            </svg>
+          </a>
+        </div>
       </div>
       
-      <div class="source-link-container">
-        <a id="drawer-source-link" href="#" target="_blank" rel="noopener noreferrer" class="source-link">
-          <span>View on Google Cloud Release Notes</span>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="external-icon">
-            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-            <polyline points="15 3 21 3 21 9"></polyline>
-            <line x1="10" y1="14" x2="21" y2="3"></line>
-          </svg>
-        </a>
+      <!-- TAB 2: Gemini AI Analysis Panel -->
+      <div id="tab-ai" class="tab-pane" role="tabpanel" aria-labelledby="ai-tab">
+        <div class="ai-controls-bar">
+          <div class="select-group">
+            <label for="ai-mode-selector">Analysis Category:</label>
+            <select id="ai-mode-selector">
+              <option value="summary">Developer Summary</option>
+              <option value="explanation_beginner">Beginner Explanation</option>
+              <option value="explanation_tech">Deep Technical Details</option>
+              <option value="impact">System Impact Analysis</option>
+              <option value="migration">Migration Suggestions</option>
+              <option value="upgrade_checklist">Upgrade Checklist</option>
+              <option value="breaking_warning">Breaking Change Warning</option>
+              <option value="tweet">Tweet Draft</option>
+              <option value="linkedin">LinkedIn Post</option>
+              <option value="blog">Blog Outline</option>
+            </select>
+          </div>
+          
+          <div class="select-group">
+            <label for="ai-length-selector">Length:</label>
+            <select id="ai-length-selector">
+              <option value="short">Brief / Bullets</option>
+              <option value="medium" selected>Standard</option>
+              <option value="long">Detailed</option>
+            </select>
+          </div>
+        </div>
+        
+        <div id="ai-summary-output" class="ai-output-container">
+          <!-- Gemini AI output renders dynamically -->
+        </div>
       </div>
+      
+      <!-- TAB 3: Share, Copy & Tweet Panel -->
+      <div id="tab-share" class="tab-pane" role="tabpanel" aria-labelledby="share-tab">
+        <div class="export-actions-row">
+          <button id="copy-markdown-btn" class="btn btn-outline" aria-label="Copy release as Markdown format">
+            <span>Copy as Markdown</span>
+          </button>
+          <button id="copy-html-btn" class="btn btn-outline" aria-label="Copy release as HTML format">
+            <span>Copy as HTML</span>
+          </button>
+          <button id="web-share-btn" class="btn btn-outline btn-share" aria-label="Share using native mobile system menu">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="btn-icon-svg" aria-hidden="true">
+              <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13"/>
+            </svg>
+            <span>Share Native</span>
+          </button>
+        </div>
 
-      <!-- Tweet Composer Card -->
-      <section class="tweet-composer-card">
-        <div class="card-header">
-          <svg class="twitter-icon" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-          </svg>
-          <h3>Tweet this Update</h3>
-        </div>
-        <div class="card-body">
-          <div class="textarea-wrapper">
-            <textarea id="tweet-textarea" rows="5" maxlength="500" placeholder="Draft your tweet here..."></textarea>
+        <!-- Tweet Composer Card -->
+        <section class="tweet-composer-card" aria-label="Tweet composer wrapper">
+          <div class="card-header">
+            <svg class="twitter-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+            </svg>
+            <h3>Compose Tweet</h3>
           </div>
-          <div class="composer-meta">
-            <span id="char-counter" class="char-counter">0 / 280</span>
-            <div id="char-warning" class="char-warning" style="display: none;">Exceeds X limit (280 chars)</div>
+          <div class="card-body">
+            <div class="textarea-wrapper">
+              <textarea id="tweet-textarea" rows="5" maxlength="500" aria-label="Tweet text editor"></textarea>
+            </div>
+            <div class="composer-meta">
+              <span id="char-counter" class="char-counter">0 / 280</span>
+              <div id="char-warning" class="char-warning" style="display: none;">Exceeds X limit (280 chars)</div>
+            </div>
+            <div class="composer-actions">
+              <button id="copy-tweet-btn" class="btn btn-outline">
+                <span>Copy Draft</span>
+              </button>
+              <button id="tweet-btn" class="btn btn-twitter" aria-label="Publish tweet on X">
+                <span>Tweet</span>
+              </button>
+            </div>
           </div>
-          <div class="composer-actions">
-            <button id="copy-tweet-btn" class="btn btn-outline">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="btn-icon-svg">
-                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-              </svg>
-              <span>Copy</span>
-            </button>
-            <button id="tweet-btn" class="btn btn-twitter">
-              <svg viewBox="0 0 24 24" fill="currentColor" class="btn-icon-svg">
-                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-              </svg>
-              <span>Tweet</span>
-            </button>
-          </div>
-        </div>
-      </section>
+        </section>
+      </div>
     </div>
   </dialog>
 
   <!-- Toast Notification System -->
-  <div id="toast-container" class="toast-container"></div>
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
 
   <!-- Scripts -->
-  <script src="/static/app.js"></script>
+  <script type="module" src="/static/app.js"></script>
 </body>
 </html>

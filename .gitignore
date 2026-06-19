@@ -17,3 +17,6 @@ Thumbs.db
 .venv
 env/
 ENV/
+
+# Local cache data
+release_notes_cache.json
