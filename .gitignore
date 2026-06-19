@@ -1,0 +1,19 @@
+# Python virtual environment
+venv/
+
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+
+# System / OS files
+.DS_Store
+Thumbs.db
+
+# Environments
+.env
+.venv
+env/
+ENV/
