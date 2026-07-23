@@ -1,0 +1,10 @@
+# Build outputs
+YogiTimer.app/
+build/
+
+# OS metadata
+.DS_Store
+
+# User configurations
+*.xcuserdatad/
+xcuserdata/
