@@ -1,0 +1,167 @@
+{
+    "id": "ING-002",
+    "canonical_name": "Tulsi",
+    "taxonomy": {
+        "scientific_name": "Ocimum tenuiflorum",
+        "common_name": "Holy Basil",
+        "sanskrit_name": "Tulasi",
+        "family": "Lamiaceae",
+        "powo_id": "urn:lsid:ipni.org:names:450125-1",
+        "ncbi_taxon_id": 28540,
+        "gbif_id": 2927096,
+        "synonyms": [
+            "Ocimum sanctum L.",
+            "Ocimum frutescens Burm.f."
+        ]
+    },
+    "ayurveda": {
+        "sanskrit_name": "Tulasi",
+        "rasa": [
+            "Katu",
+            "Tikta"
+        ],
+        "guna": [
+            "Laghu",
+            "Ruksha",
+            "Teekshna"
+        ],
+        "virya": "Ushna",
+        "vipaka": "Katu",
+        "overall_dosha": "Vata-Kaphahara",
+        "rasa_vector": [
+            0.0,
+            0.0,
+            0.0,
+            0.5,
+            0.9,
+            0.0
+        ],
+        "guna_vector": [
+            1.0,
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+        ],
+        "virya_scalar": 0.7,
+        "vipaka_vector": [
+            0,
+            0,
+            1
+        ],
+        "dosha_impact": [
+            -1,
+            1,
+            -1
+        ],
+        "karma": [
+            "Svasahara (Respiratory relief)",
+            "Deepana (Digestive fire promoting)",
+            "Vishaghna (Anti-toxic)",
+            "Kasahara (Cough relief)"
+        ],
+        "classical_references": [
+            {
+                "text_name": "Ayurvedic Pharmacopoeia of India",
+                "citation": "Part I, Volume II, pp. 165-167",
+                "context": "Specifies quality guidelines for dry leaves of Ocimum sanctum L., listing Katu-Tikta Rasa, Ushna Virya, and Katu Vipaka."
+            },
+            {
+                "text_name": "Bhavaprakasha Nighantu",
+                "citation": "Guduchyadi Varga, Shloka 62-63",
+                "context": "Identifies Tulasi as surasa (aromatic), kasashvashaharah (cures cough and dyspnea), and pittakrit (increases Pitta)."
+            }
+        ]
+    },
+    "nutrition": {
+        "usda_fdc_id": "172227",
+        "basis": "100g serving",
+        "calories": 23.0,
+        "proteins_g": 3.15,
+        "fats_g": 0.64,
+        "carbs_g": 2.65,
+        "fiber_g": 1.6,
+        "minerals": {
+            "calcium_mg": 177.0,
+            "iron_mg": 3.17,
+            "magnesium_mg": 64.0,
+            "potassium_mg": 295.0,
+            "sodium_mg": 9.0
+        }
+    },
+    "phytochemicals": [
+        {
+            "name": "Eugenol",
+            "pubchem_cid": 3314,
+            "molecular_formula": "C10H12O2",
+            "smiles": "COC1=C(C=CC(=C1)CC=C)O",
+            "inchikey": "RJUUPFJSKDNJQM-UHFFFAOYSA-N",
+            "typical_concentration_range": "30.0% - 70.0% of volatile oil",
+            "imppat_id": "IMPHY000049",
+            "bioactivities": [
+                "Antiseptic",
+                "Analgesic",
+                "Anti-inflammatory"
+            ]
+        },
+        {
+            "name": "beta-Caryophyllene",
+            "pubchem_cid": 5281515,
+            "molecular_formula": "C15H24",
+            "typical_concentration_range": "5.0% - 20.0%",
+            "imppat_id": "IMPHY000724",
+            "bioactivities": [
+                "Anti-inflammatory",
+                "Anxiolytic"
+            ]
+        }
+    ],
+    "flavor_molecules": [
+        {
+            "name": "Eugenol",
+            "pubchem_cid": 3314,
+            "flavordb_id": "FDB000854",
+            "odor_type": "clove, sweet, spicy",
+            "flavor_profile": [
+                "clove",
+                "spicy",
+                "warm"
+            ]
+        },
+        {
+            "name": "beta-Caryophyllene",
+            "pubchem_cid": 5281515,
+            "flavordb_id": "FDB008924",
+            "odor_type": "woody, spicy",
+            "flavor_profile": [
+                "woody",
+                "spicy"
+            ]
+        }
+    ],
+    "disease_associations": [
+        {
+            "disease_name": "Generalized Anxiety Disorder",
+            "mesh_id": "D001008",
+            "evidence_level": "Moderate",
+            "pubmed_ids": [
+                "PMID: 18226054"
+            ],
+            "clinicaltrials_gov_ids": [
+                "NCT01809626"
+            ],
+            "summary": "Clinical trials demonstrate that Ocimum sanctum extract significantly reduces anxiety indices, confirming its adaptogenic role."
+        }
+    ],
+    "research_papers": [
+        {
+            "pmid": "25624701",
+            "title": "Tulsi - Ocimum sanctum: A herb for all reasons",
+            "authors": "Cohen MM",
+            "journal": "J Ayurveda Integr Med",
+            "year": 2014,
+            "abstract": "Summarizes the clinical evidence for the physiological and adaptogenic properties of Tulsi."
+        }
+    ]
+}

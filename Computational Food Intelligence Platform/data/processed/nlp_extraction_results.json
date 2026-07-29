@@ -1,0 +1,56 @@
+{
+    "turmeric_abstract": {
+        "raw_text": "Haridra (Curcuma longa) is characterized by Tikta and Katu Rasa. It possesses Laghu and Ruksha qualities (Guna), with Ushna Virya and Katu Vipaka. It is highly effective in pacifying Kapha and Pitta. The therapeutic actions are largely attributed to its active component Curcumin, which exhibits strong anti-inflammatory properties.",
+        "extracted_entities": {
+            "rasa": [
+                "Katu",
+                "Tikta"
+            ],
+            "guna": [
+                "Laghu",
+                "Ruksha"
+            ],
+            "virya": [
+                "Ushna"
+            ],
+            "vipaka": [
+                "Katu"
+            ],
+            "dosha": [
+                "Pitta",
+                "Kapha"
+            ],
+            "phytochemicals": [
+                "Curcumin"
+            ]
+        }
+    },
+    "tulsi_abstract": {
+        "raw_text": "Tulasi (Ocimum tenuiflorum), or Holy Basil, belongs to the family Lamiaceae. It is described as having Katu and Tikta Rasa, with Laghu, Ruksha, and Teekshna Guna. It acts on Vata and Kapha (Vata-Kaphahara). The plant yields volatile essential oil containing Eugenol, Caryophyllene, and Linalool, as well as triterpenoid Ursolic acid.",
+        "extracted_entities": {
+            "rasa": [
+                "Katu",
+                "Tikta"
+            ],
+            "guna": [
+                "Teekshna",
+                "Laghu",
+                "Ruksha"
+            ],
+            "virya": [],
+            "vipaka": [
+                "Katu"
+            ],
+            "dosha": [
+                "Kapha",
+                "Vata"
+            ],
+            "phytochemicals": [
+                "Eugenol",
+                "Ursolic acid",
+                "Caryophyllene",
+                "Linalool"
+            ]
+        }
+    }
+}
